@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<p>1、单文件上传</p>
+<form action="upload" method="POST" enctype="multipart/form-data">
+    文件：<input type="file" name="file"/>
+    <input type="submit"/>
+</form>
+<hr/>
+<p>2、文件下载</p>
+<form action="download" method="POST" enctype="multipart/form-data">
+    文件ID：<input type="text" name="fileId"/>
+    <input type="submit" value="下载文件"/>
+</form>
+<hr/>
+<p>3、多文件上传</p>
+<form action="batchUpload" method="POST" enctype="multipart/form-data">
+    一次选择多个文件的多文件上传：<input type="file" name="files" multiple>
+    <input type="submit"/>
+</form>
+</body>
+</html>
