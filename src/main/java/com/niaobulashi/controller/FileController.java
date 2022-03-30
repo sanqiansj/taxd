@@ -357,7 +357,6 @@ public class FileController {
         String newPath = serverPath + "\\" + Cname;
 
         File file = new File(newPath);
-//        String func = func(file);
         String func = String.valueOf(getFilePath(file));
         String str1 = func.substring(1);
         String substring = str1.substring(0, func.length() - 2);
@@ -372,10 +371,9 @@ public class FileController {
         System.out.println("向http 请求发送："+str);
 
         //调用HttpThread  url params cname
-//        Integer id = taskInfo.getId();
-//        HttpThread httpThread = new HttpThread(get,params1,taskInfo,taskInfoDao);
-//        Thread thread = new Thread(httpThread);
-//        thread.start();
+        HttpThread httpThread = new HttpThread(get,params1,taskInfo,taskInfoDao);
+        Thread thread = new Thread(httpThread);
+        thread.start();
 
         System.out.println("结束HTTP0000000000000000000000000");
         return ResponseCode.success("批量上传成功");
@@ -489,14 +487,14 @@ class HttpThread implements Runnable{
     public void run() {
         //开始线程
         System.out.println("\n\n----------------------------------------------");
-        System.out.println(Thread.currentThread().getName() + "正在处理请求");
-        System.out.println("----------------------------------------------");
+        System.out.println(Thread.currentThread().getName() + "正在处理http请求");
         String result = "请求失败";
         result = HttpTools.get(url, params);
         System.out.println(result);
 
         String result1 = getResult(result);
         System.out.println("获取结果路径："+result1);
+        System.out.println("----------------------------------------------");
 
 //        List<TaskInfo> all = taskInfoDao.findAll();
 //        System.out.println(all);
