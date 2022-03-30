@@ -3,6 +3,7 @@ package com.niaobulashi.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
 import java.io.Serializable;
 
 /**
@@ -28,4 +29,7 @@ public class SysFileInfo implements Serializable {
 
     @Column(nullable = false)
     private Long fileSize;
+
+    @Column(nullable = false)
+    private String taskName;
 }
