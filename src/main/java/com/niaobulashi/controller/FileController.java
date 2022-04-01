@@ -2,7 +2,7 @@ package com.niaobulashi.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import net.sf.json.JSONObject;
 import com.niaobulashi.Utils.HttpTools;
 import com.niaobulashi.common.dto.ResponseCode;
 import com.niaobulashi.dao.SysFileInfoDao;
@@ -10,6 +10,7 @@ import com.niaobulashi.dao.TaskInfoDao;
 import com.niaobulashi.model.SysFileInfo;
 import com.niaobulashi.model.TaskInfo;
 import com.niaobulashi.properties.GlobalProperties;
+import com.niaobulashi.service.PdfService;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -59,6 +60,9 @@ public class FileController {
     @Autowired
     private GlobalProperties globalProperties;
 
+    @Autowired
+    private PdfService pdfService;
+
     /**
      * 文件上传页面
      *
@@ -69,7 +73,10 @@ public class FileController {
         return "file";
     }
 
-
+    /**
+     * 展示任务列表
+     * @return
+     */
     @GetMapping("/showTasks")
     @ResponseBody
     public JSONObject showTask(){
@@ -89,6 +96,99 @@ public class FileController {
         System.out.println(data);
         return data;
     }
+
+    /**
+     * 参数  任务名字
+     * 展示 该任务的 文件列表
+     *
+     * @return
+     */
+    @GetMapping("/showFileInfo")
+    @ResponseBody
+    public JSONObject showFileInfo(String taskName){
+        List<SysFileInfo> data = sysFileInfoDao.searchByTaskName(taskName);
+        JSONObject data1 = new JSONObject();
+        data1.put("total", data.size());
+        data1.put("rows", data);
+        System.out.println(data1);
+        return data1;
+    }
+
+    /**
+     * 参数  任务id
+     * 根据文件id下载  结果文件
+     * (未完成)
+     * @return
+     */
+    @PostMapping("/downloadTow")
+    @ResponseBody
+    public ResponseCode downloadTow(@RequestParam("fileId") Integer fileId, HttpServletRequest request, HttpServletResponse response){
+        logger.info("文件ID为：" + fileId);
+        // 判断传入参数是否非空
+        if (fileId == null) {
+            return ResponseCode.error("请求参数不能为空");
+        }
+        // 根据fileId查询文件表
+        Optional<SysFileInfo> sysFileInfo = sysFileInfoDao.findById(fileId);
+
+        Optional<TaskInfo> byId = taskInfoDao.findById(fileId);
+//        if (sysFileInfo.isPresent()) {
+//            return ResponseCode.error("下载的文件不存在");
+//        }
+        // 获取文件全路径
+        File file = new File(sysFileInfo.get().getResultPath());
+//        String fileNames = byId.get().getName();
+
+        // 判断是否存在磁盘中
+        if (file.exists()) {
+            response.setContentType("application/octet-stream");
+            try {
+                response.setHeader("content-disposition", "attachement;filename=" + new String(file.getName().getBytes("utf-8"), "ISO-8859-1"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+//            // 设置强制下载不打开
+//            response.setContentType("application/force-download");
+//            // 设置文件名
+//            response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);
+            byte[] buffer = new byte[1024];
+            FileInputStream fis = null;
+            BufferedInputStream bis = null;
+            try {
+                fis = new FileInputStream(file);
+                bis = new BufferedInputStream(fis);
+                OutputStream os = response.getOutputStream();
+                int i = bis.read(buffer);
+                while (i != -1) {
+                    os.write(buffer, 0, i);
+                    i = bis.read(buffer);
+                }
+                return ResponseCode.success("下载成功");
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (bis != null) {
+                    try {
+                        bis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } else {
+            return ResponseCode.error("数据库查询存在，本地磁盘不存在文件");
+        }
+        return ResponseCode.success("下载失败");
+    }
+
 
     @GetMapping("/test")
     @ResponseBody
@@ -164,7 +264,8 @@ public class FileController {
         sysFileInfo.setFileName(fileName);
         sysFileInfo.setFilePath(serverPath + "/" + saveFileName);
         sysFileInfo.setFileSize(file.getSize());
-        sysFileInfo.setTaskName(name);
+        sysFileInfo.setTaskName(cname);
+        sysFileInfo.setResultStatus(0);
 
         logger.info("新增文件数据");
         // 新增文件数据
@@ -191,12 +292,12 @@ public class FileController {
             return ResponseCode.error("请求参数不能为空");
         }
         // 根据fileId查询文件表
-        Optional<SysFileInfo> sysFileInfo = sysFileInfoDao.findById(fileId);
+//        Optional<SysFileInfo> sysFileInfo = sysFileInfoDao.findById(fileId);
 
         Optional<TaskInfo> byId = taskInfoDao.findById(fileId);
-        if (sysFileInfo.isPresent()) {
-            return ResponseCode.error("下载的文件不存在");
-        }
+//        if (sysFileInfo.isPresent()) {
+//            return ResponseCode.error("下载的文件不存在");
+//        }
         // 获取文件全路径
         File file = new File(byId.get().getPath());
         String fileNames = byId.get().getName();
@@ -254,6 +355,7 @@ public class FileController {
 
     /**
      * 批量文件上传
+     * 功能一
      *
      * @param files
      * @return
@@ -263,13 +365,13 @@ public class FileController {
     @ResponseBody
     public ResponseCode batchUpload(@RequestParam("files") MultipartFile[] files, String Cname) throws Exception {
 
-        String name = newName(Cname);
+        String name = newName(Cname,1);
         if (files == null) {
             return ResponseCode.error("参数为空");
         }
         for (MultipartFile multipartFile : files) {
             String name1 = multipartFile.getName();
-            upload(multipartFile, name1, Cname);
+            upload(multipartFile, name1, name);
         }
         //新建任务
         //当前时间
@@ -281,17 +383,18 @@ public class FileController {
         taskInfo.setName(name);
         taskInfo.setTime(format);
         taskInfo.setStatus(0);
+        taskInfo.setType(1);
         taskInfoDao.save(taskInfo);
         //建完任务直接调用算法接口  公司名字和路径  -》  结果文件路径
         String serverPath = "D:\\文档\\工作\\SC";
-        String newPath = serverPath + "\\" + Cname;
+        String newPath = serverPath + "\\" + name;
 
         File file = new File(newPath);
 //        String func = func(file);
         String func = String.valueOf(getFilePath(file));
         String str1 = func.substring(1);
         String substring = str1.substring(0, func.length() - 2);
-        String str = Cname + "#" + substring;
+        String str = name + "#" + substring;
 
         String get = "http://192.168.3.109:5000/Date";
 
@@ -324,8 +427,9 @@ public class FileController {
 
     /**
      * 批量文件上传
+     * 功能二
      *
-     * @param files
+     * @param files   公司名， 一个excel 若干个word 和 pdf
      * @return
      * @throws Exception
      */
@@ -333,13 +437,13 @@ public class FileController {
     @ResponseBody
     public ResponseCode patentTow(@RequestParam("files") MultipartFile[] files, String Cname) throws Exception {
 
-        String name = newName(Cname);
+        String name = newName(Cname,2);
         if (files == null) {
             return ResponseCode.error("参数为空");
         }
         for (MultipartFile multipartFile : files) {
             String name1 = multipartFile.getName();
-            upload(multipartFile, name1, Cname);
+            upload(multipartFile, name1, name);
         }
         //新建任务
         //当前时间
@@ -351,31 +455,68 @@ public class FileController {
         taskInfo.setName(name);
         taskInfo.setTime(format);
         taskInfo.setStatus(0);
+        taskInfo.setType(2);
         taskInfoDao.save(taskInfo);
         //建完任务直接调用算法接口  公司名字和路径  -》  结果文件路径
         String serverPath = "D:\\文档\\工作\\SC";
-        String newPath = serverPath + "\\" + Cname;
+        String newPath = serverPath + "\\" + name;
 
         File file = new File(newPath);
-        String func = String.valueOf(getFilePath(file));
-        String str1 = func.substring(1);
-        String substring = str1.substring(0, func.length() - 2);
-        String str = Cname + "#" + substring;
+        List<String> filePath = getFilePath(file);
+        System.out.println(filePath);
 
-        String get = "http://192.168.3.109:5000/Date";
+        String pathResult = "";
+        ArrayList<JSONObject> jsonObjects = new ArrayList<>();
+        JSONObject pathjson = new JSONObject();
+        JSONObject json = new JSONObject();
 
-        System.out.println("开始HTTP0000000000000000000000000");
-        Map<String, Object> params1 = new HashMap<String, Object>();
+        for (String path:filePath) {
+            String nowPath=path.substring(path.length() -3,path.length());
+            if (nowPath.equals("lsx")||nowPath.equals("xls")){
+                //获取表路径
+                pathResult=path;
+                pathjson.put("规划表",path);
+                jsonObjects.add(pathjson);
+            }
+            if (nowPath.equals("ocx")||nowPath.equals("doc")){
+                //做doc 分析处理 放入jsonarry
+                JSONObject data = pdfService.analysisWord(path);
+                jsonObjects.add(data);
+            }
+            if (nowPath.equals("pdf")||nowPath.equals("PDF")){
+                //做pdf 分析处理 放入jsonarry
+                JSONObject data = pdfService.analysispdf(path);
+                jsonObjects.add(data);
+            }
+        }
+        System.out.println("HTTP发送的数据"+jsonObjects);
 
-        params1.put("file_name",str);
-        System.out.println("向http 请求发送："+str);
 
-        //调用HttpThread  url params cname
-        HttpThread httpThread = new HttpThread(get,params1,taskInfo,taskInfoDao);
-        Thread thread = new Thread(httpThread);
-        thread.start();
+        //如果是 excel
 
-        System.out.println("结束HTTP0000000000000000000000000");
+        //如果是 pdf
+
+        //如果是 word
+
+        //最后返回 word 和 excel 解析后的 jsonarry 数组
+
+        //发送http请求
+
+//        String str = Cname + "#" + substring;
+
+//        String get = "http://192.168.3.109:5000/Date";
+//
+//        System.out.println("开始HTTP0000000000000000000000000");
+//        Map<String, Object> params1 = new HashMap<String, Object>();
+//
+//        params1.put("file_name",str);
+//        System.out.println("向http 请求发送："+str);
+//
+//        调用HttpThread  url params cname
+//        HttpThread httpThread = new HttpThread(get,params1,taskInfo,taskInfoDao);
+//        Thread thread = new Thread(httpThread);
+//        thread.start();
+//        System.out.println("结束HTTP0000000000000000000000000");
         return ResponseCode.success("批量上传成功");
     }
 
@@ -383,9 +524,18 @@ public class FileController {
 
 
 
-    public static String newName(String name) {
+
+
+
+    public static String newName(String name,int type) {
         LocalDateTime localDateTime = LocalDateTime.now();
-        String newName = "任务" + '〔' + localDateTime.getYear() + '〕' + localDateTime.format(DateTimeFormatter.ofPattern("MMdd")) + "-" + name;
+        String newName="";
+        if (type==1){
+            newName="辅助帐" + '〔' + localDateTime.getYear() + '〕' + localDateTime.format(DateTimeFormatter.ofPattern("MMdd")) + "-" + name;
+        }
+        if (type==2){
+            newName="专利" + '〔' + localDateTime.getYear() + '〕' + localDateTime.format(DateTimeFormatter.ofPattern("MMdd")) + "-" + name;
+        }
         return newName;
     }
 
@@ -505,10 +655,15 @@ class HttpThread implements Runnable{
     }
 
     public String getResult(String results){
-        JSONObject parse = (JSONObject) JSONObject.parse(results);
-        JSONObject result = (JSONObject) parse.get("result");
+        JSONObject jsonObject = JSONObject.fromObject(results);
+        JSONObject result = (JSONObject) jsonObject.get("result");
         String saved_path = String.valueOf(result.get("saved_path"));
         System.out.println(saved_path);
         return saved_path;
+    }
+
+    public static void main(String[] args) {
+
+
     }
 }

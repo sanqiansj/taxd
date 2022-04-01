@@ -1,5 +1,6 @@
 package com.niaobulashi.service;
 
+import net.sf.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 /**
@@ -9,8 +10,8 @@ import org.springframework.stereotype.Service;
 @Service
 public interface PdfService {
 
-    void analysis();
+    JSONObject analysispdf(String path);
 
 
-    void analysisWord();
+    JSONObject analysisWord(String path);
 }

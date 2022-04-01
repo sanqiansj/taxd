@@ -31,4 +31,8 @@ public class TaskInfo implements Serializable {
     @Column(nullable = false)
     private Integer status;
 
+
+    @Column(nullable = false)
+    private Integer type;
+
 }

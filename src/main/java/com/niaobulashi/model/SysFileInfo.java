@@ -32,4 +32,10 @@ public class SysFileInfo implements Serializable {
 
     @Column(nullable = false)
     private String taskName;
+
+    @Column(nullable = false)
+    private String resultPath;
+
+    @Column(nullable = false)
+    private Integer resultStatus;
 }
