@@ -79,8 +79,9 @@ public class FileController {
 
         JSONArray jsonArray = new JSONArray();
         for (TaskInfo info: all){
-            JSONObject json = (JSONObject) JSON.toJSON(info);
-            jsonArray.add(json);
+//            JSONObject json = (JSONObject) JSON.toJSON(info);
+            JSONObject jsonObject = JSONObject.fromObject(info);
+            jsonArray.add(jsonObject);
         }
         data.put("total",all.size());
         data.put("rows",jsonArray);
