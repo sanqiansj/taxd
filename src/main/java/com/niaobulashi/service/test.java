@@ -1,6 +1,5 @@
 package com.niaobulashi.service;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -13,9 +12,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * @author y
@@ -46,10 +42,6 @@ public class test {
             //换行符截取
             String[] split = text.split("\n");
 
-//            List<String> splits = Arrays.asList(split);
-//            for (int i = 0; i < splits.size(); i++) {
-//                System.out.println("123"+splits.get(i));
-//            }
             StringBuilder sb = new StringBuilder();
             for (String s : split) {
                 String s3 = subStu(s, "[", "]");
@@ -161,8 +153,9 @@ public class test {
     }
 
     public static void main(String[] args) {
-        String s = readWord("D:\\文档\\工作\\SC\\test.doc");
-        System.out.println(s);
+        String s = readWord("D:\\文档\\工作\\SC\\5.一种便于拆卸的细长密封浮动球阀(1).docx");
+        JSONObject jsonObject = parseWord(s);
+        System.out.println(jsonObject);
     }
 
     //读取 word 中的内容
@@ -189,6 +182,34 @@ public class test {
             System.out.println(e);
         }
         return buffer;
+    }
+
+    public static JSONObject parseWord(String data){
+        JSONObject jsonObject= new JSONObject();
+
+        String replace = data.replace("\n", "");
+//        String replace1 = replace.replace(" ", "");
+        String str = replace.replace("\t", "");
+
+        String s1 = subString(str, "背景技术", "实用新型内容");
+
+//        String s2 = subString(str, "发明内容", "具体实施方式");
+        String s3 = subString(str, "具体实施方式", "说 明 书 附 图");
+//        String s4 = subString(str, "发明名称", "摘要");
+        String s5 = subString(str, "摘要", "权 利 要 求 书");
+        String s6 = subString(str, "技术领域", "背景技术");
+        String s7 = subStu(subString(str, "实用新型名称", "摘要"),"（","）");
+        String s8 = subString(str, "实用新型内容", "附图说明");
+
+        jsonObject.put("背景技术", s1);
+        jsonObject.put("发明内容", "null");
+        jsonObject.put("具体实施方式", s3);
+        jsonObject.put("发明名称", "null");
+        jsonObject.put("摘要", s5);
+        jsonObject.put("技术领域", s6);
+        jsonObject.put("实用新型名称", s7);
+        jsonObject.put("实用新型内容", s8);
+        return jsonObject;
     }
 
 

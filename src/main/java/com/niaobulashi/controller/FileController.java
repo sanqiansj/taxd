@@ -11,14 +11,6 @@ import com.niaobulashi.model.SysFileInfo;
 import com.niaobulashi.model.TaskInfo;
 import com.niaobulashi.properties.GlobalProperties;
 import com.niaobulashi.service.PdfService;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +18,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -262,7 +253,7 @@ public class FileController {
 
         // 保存数据
         sysFileInfo.setFileName(fileName);
-        sysFileInfo.setFilePath(serverPath + "/" + saveFileName);
+        sysFileInfo.setFilePath(serverPath + "\\" + saveFileName);
         sysFileInfo.setFileSize(file.getSize());
         sysFileInfo.setTaskName(cname);
         sysFileInfo.setResultStatus(0);
@@ -276,7 +267,7 @@ public class FileController {
 
 
     /**
-     * 下载
+     * 下载（功能一）
      *
      * @param fileId
      * @param request
@@ -411,10 +402,9 @@ public class FileController {
 
 
         //调用HttpThread  url params cname
-//        Integer id = taskInfo.getId();
-//        HttpThread httpThread = new HttpThread(get,params1,taskInfo,taskInfoDao);
-//        Thread thread = new Thread(httpThread);
-//        thread.start();
+        HttpThread httpThread = new HttpThread(get,params1,taskInfo,taskInfoDao);
+        Thread thread = new Thread(httpThread);
+        thread.start();
 
 
 
@@ -468,28 +458,49 @@ public class FileController {
         String pathResult = "";
         ArrayList<JSONObject> jsonObjects = new ArrayList<>();
         JSONObject pathjson = new JSONObject();
+        JSONObject pathjson1 = new JSONObject();
         JSONObject json = new JSONObject();
 
+
+//        String saveFileName = "111";
+
+
         for (String path:filePath) {
+            String fileExtension = path.substring(path.lastIndexOf(".")).toLowerCase();
+
+            String saveFileName = System.currentTimeMillis() + fileExtension;
+
             String nowPath=path.substring(path.length() -3,path.length());
             if (nowPath.equals("lsx")||nowPath.equals("xls")){
                 //获取表路径
                 pathResult=path;
                 pathjson.put("规划表",path);
+                pathjson.put("原始文件路径",serverPath+path);
                 jsonObjects.add(pathjson);
             }
             if (nowPath.equals("ocx")||nowPath.equals("doc")){
                 //做doc 分析处理 放入jsonarry
                 JSONObject data = pdfService.analysisWord(path);
+                data.put("原始文件路径",serverPath+path);
+
+
+
                 jsonObjects.add(data);
             }
             if (nowPath.equals("pdf")||nowPath.equals("PDF")){
                 //做pdf 分析处理 放入jsonarry
                 JSONObject data = pdfService.analysispdf(path);
+                data.put("原始文件路径",serverPath+path);
+
+
                 jsonObjects.add(data);
             }
         }
         System.out.println("HTTP发送的数据"+jsonObjects);
+
+
+
+        String s = newTxt(jsonObjects.toString());
 
 
         //如果是 excel
@@ -500,27 +511,60 @@ public class FileController {
 
         //最后返回 word 和 excel 解析后的 jsonarry 数组
 
-        //发送http请求
-
-//        String str = Cname + "#" + substring;
-
 //        String get = "http://192.168.3.109:5000/Date";
-//
-//        System.out.println("开始HTTP0000000000000000000000000");
-//        Map<String, Object> params1 = new HashMap<String, Object>();
-//
-//        params1.put("file_name",str);
-//        System.out.println("向http 请求发送："+str);
-//
-//        调用HttpThread  url params cname
-//        HttpThread httpThread = new HttpThread(get,params1,taskInfo,taskInfoDao);
-//        Thread thread = new Thread(httpThread);
-//        thread.start();
-//        System.out.println("结束HTTP0000000000000000000000000");
+        String get = "http://192.168.3.109:5001/Date";
+        System.out.println("开始HTTP0000000000000000000000000");
+        Map<String, Object> params1 = new HashMap<String, Object>();
+//        params1.put("file_name","/Users/ture/BU/work/专利/3-31/httpParam.txt");
+        params1.put("file_name","/Users/ture/BU/work/专利/3-31/httpParam.txt");
+
+//        params1.put("file_name","大理欧普智能科技有限公司公司公司#/Users/ture/BU/work/专利/大理/大理欧普智能科技有限公司规划表.xls,/Users/ture/BU/work/专利/大理/大理_2021序时账.xls,/Users/ture/BU/work/专利/大理/大理2020序时账.xls,/Users/ture/BU/work/专利/大理/大理_2019序时账.xls");
+        System.out.println("向http 请求发送："+"str");
+
+        HttpThread2 httpThread2 = new HttpThread2(get,params1,sysFileInfoDao);
+        Thread thread2 = new Thread(httpThread2);
+        thread2.start();
+        System.out.println("结束HTTP000000000000000000000000");
         return ResponseCode.success("批量上传成功");
     }
 
 
+    public static String newTxt(String txt){
+        String resultPath="";
+        try {
+            // 保存路径
+            String path = "D:\\文档\\工作\\SC";
+            String title = System.currentTimeMillis() + "专利解析文件";
+            // 防止文件建立或读取失败，用catch捕捉错误并打印，也可以throw
+            /* 写入Txt文件 */
+            File mkdirsName = new File(path);// 相对路径，如果没有则要建立一个新的output。txt文件
+            if(!mkdirsName.exists()){
+                mkdirsName.mkdirs();
+            }
+            resultPath=path+"\\"+title+".txt";
+            File writename = new File(resultPath);// 相对路径，如果没有则要建立一个新的output。txt文件
+            // 判断文件是否存在，不存在即新建
+            // 存在即根据操作系统添加换行符
+            if(!writename.exists()) {
+                writename.createNewFile(); // 创建新文件
+            } else {
+                String osName = System.getProperties().getProperty("os.name");
+                if (osName.equals("Linux")) {
+                    txt = "\r" + txt;
+                } else {
+                    txt = "\r\n" + txt;
+                }
+            }
+            // 如果是在原有基础上写入则append属性为true，默认为false
+            BufferedWriter out = new BufferedWriter(new FileWriter(writename,true));
+            out.write(txt); // 写入TXT
+            out.flush(); // 把缓存区内容压入文件
+            out.close(); // 最后记得关闭文件
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resultPath;
+    }
 
 
 
@@ -549,37 +593,6 @@ public class FileController {
         return str;
     }
 
-    public void http(String url, String data) {
-        String value="12222";
-        //创建post请求对象
-        HttpPost post = new HttpPost(url);
-        try {
-            //创建参数集合
-            List<BasicNameValuePair> list = new ArrayList<BasicNameValuePair>();
-            //添加参数
-//            list.add(new BasicNameValuePair("input_data", data));
-            list.add(new BasicNameValuePair("name", data));
-            list.add(new BasicNameValuePair("age", "1"));
-//            list.add(new BasicNameValuePair("releaseDate","2020-07-14 09:55:20"));
-            //把参数放入请求对象，，post发送的参数list，指定格式
-            post.setEntity(new UrlEncodedFormEntity(list, "UTF-8"));
-            //添加请求头参数
-            post.addHeader("timestamp","1594695607545");
-            CloseableHttpClient client = HttpClients.createDefault();
-            //启动执行请求，并获得返回值
-            CloseableHttpResponse response = client.execute(post);
-            //得到返回的entity对象
-            HttpEntity entity = response.getEntity();
-            //把实体对象转换为string
-            String result = EntityUtils.toString(entity, "UTF-8");
-            //返回内容
-            System.out.println("result++++++++++++++++++++++++++"+result);
-        } catch (Exception e1) {
-            e1.printStackTrace();
-
-        }
-
-    }
 
     public static List<String> getFilePath(File file){
         List filePaths= new ArrayList();
@@ -599,28 +612,12 @@ public class FileController {
         return filePaths;
     }
 
-
-
-//    @Async("SyncThread")
-//    @RequestMapping(value = "/addBlog")
-//    public CompletableFuture<String> addBlog(String url,Map<String, Object> params) {
-//        System.out.println("\n\n----------------------------------------------");
-//        System.out.println(Thread.currentThread().getName() + "正在处理请求");
-//        System.out.println("----------------------------------------------");
-//        String result = "请求失败";
-//        String s = HttpTools.get(url, params);
-//        System.out.println(s);
-//        //....你的业务逻辑
-//        return CompletableFuture.completedFuture(result);
-//    }
-//    //这样以后你的这个方法将会交由线程池去进行处理，并将结果返回，一定要记得改返回值类型，否则返回的将是空的。
-
-
-
 }
 
 
-
+/**
+ * 功能一 线程
+ */
 class HttpThread implements Runnable{
 
     private String url;
@@ -640,8 +637,8 @@ class HttpThread implements Runnable{
         System.out.println(Thread.currentThread().getName() + "正在处理http请求");
         String result = "请求失败";
         result = HttpTools.get(url, params);
-        System.out.println(result);
-
+//        System.out.println(result);
+//
         String result1 = getResult(result);
         System.out.println("获取结果路径："+result1);
         System.out.println("----------------------------------------------");
@@ -661,9 +658,82 @@ class HttpThread implements Runnable{
         System.out.println(saved_path);
         return saved_path;
     }
+}
 
-    public static void main(String[] args) {
+/**
+ *
+ * 功能二 线程
+ */
+class HttpThread2 implements Runnable{
+
+    private String url;
+    private Map<String, Object> params;
+
+
+    private SysFileInfo sysFileInfo;
+    private SysFileInfoDao sysFileInfoDao;
+    public HttpThread2(String url, Map<String, Object> params,SysFileInfoDao sysFileInfoDao) {
+        this.url = url;
+        this.params = params;
+        this.sysFileInfoDao=sysFileInfoDao;
+    }
+    @Override
+    public void run() {
+        //开始线程
+        System.out.println("\n\n----------------------------------------------");
+        System.out.println(Thread.currentThread().getName() + "正在处理http请求");
+        String result = "请求失败";
+//        result = HttpTools.get(url, params);
+        String result1 = getResult(result,sysFileInfoDao);
+        System.out.println("获取结果路径："+result1);
+        System.out.println("----------------------------------------------");
 
 
     }
+
+    public static String getResult(String results, SysFileInfoDao sysFileInfoDao){
+         results="{\n" +
+                "    \"msg\": \"completed\",\n" +
+                "    \"result\": [\n" +
+                "        {\n" +
+                "            \"result_path\": \"D:\\\\文档\\\\工作\\\\SCD:\\\\文档\\\\工作\\\\SC\\\\专利〔2022〕0405-zz公司\\\\1649148530559.pdf\",\n" +
+                "            \"saved_path\": \"D:\\\\文档\\\\工作\\\\SC\\\\1649155666614.pdf\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"result_path\": \"D:\\\\文档\\\\工作\\\\SCD:\\\\文档\\\\工作\\\\SC\\\\专利〔2022〕0405-zz公司\\\\1649148530565.docx\",\n" +
+                "            \"saved_path\": \"D:\\\\文档\\\\工作\\\\SC\\\\1649155666555.xls\"\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"status\": 200\n" +
+                "}";
+
+        Object parse = com.alibaba.fastjson.JSONObject.parse(results);
+        com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(parse.toString());
+        JSONArray result = (JSONArray) jsonObject.get("result");
+
+        if(result.size()>0){
+            for(int i=0;i<result.size();i++){
+
+                JSONObject job = JSONObject.fromObject(result.getJSONObject(i));  // 遍历 jsonarray 数组，把每一个对象转成 json 对象
+                Object saved_path = job.get("saved_path");
+                Object result_path = job.get("result_path");
+                System.out.println(saved_path) ;
+                System.out.println(result_path) ;
+
+//                sysFileInfoDao.findById()
+
+                sysFileInfoDao.updata(saved_path.toString(),result_path.toString());
+            }
+        }
+
+//        JSONArray jsonArray = JSONArray.parseArray(s);
+        System.out.println(result);
+
+        return null;
+    }
+
+    public static void main(String[] args) {
+    }
+
 }
+
