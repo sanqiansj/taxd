@@ -106,7 +106,7 @@ public class FileController {
     }
 
     /**
-     * 参数  任务id
+     * 功能二 下载
      * 根据文件id下载  结果文件
      * (未完成)
      * @return
@@ -387,7 +387,7 @@ public class FileController {
         String substring = str1.substring(0, func.length() - 2);
         String str = name + "#" + substring;
 
-        String get = "http://192.168.3.109:5000/Date";
+        String get = "localhost:5000/Date";
 
 
 
@@ -498,25 +498,14 @@ public class FileController {
         }
         System.out.println("HTTP发送的数据"+jsonObjects);
 
-
-
         String s = newTxt(jsonObjects.toString());
 
-
-        //如果是 excel
-
-        //如果是 pdf
-
-        //如果是 word
-
-        //最后返回 word 和 excel 解析后的 jsonarry 数组
-
 //        String get = "http://192.168.3.109:5000/Date";
-        String get = "http://192.168.3.109:5001/Date";
+        String get = "localhost:5001/Date";
         System.out.println("开始HTTP0000000000000000000000000");
         Map<String, Object> params1 = new HashMap<String, Object>();
 //        params1.put("file_name","/Users/ture/BU/work/专利/3-31/httpParam.txt");
-        params1.put("file_name","/Users/ture/BU/work/专利/3-31/httpParam.txt");
+        params1.put("file_name",s);
 
 //        params1.put("file_name","大理欧普智能科技有限公司公司公司#/Users/ture/BU/work/专利/大理/大理欧普智能科技有限公司规划表.xls,/Users/ture/BU/work/专利/大理/大理_2021序时账.xls,/Users/ture/BU/work/专利/大理/大理2020序时账.xls,/Users/ture/BU/work/专利/大理/大理_2019序时账.xls");
         System.out.println("向http 请求发送："+"str");
@@ -683,7 +672,7 @@ class HttpThread2 implements Runnable{
         System.out.println("\n\n----------------------------------------------");
         System.out.println(Thread.currentThread().getName() + "正在处理http请求");
         String result = "请求失败";
-//        result = HttpTools.get(url, params);
+        result = HttpTools.get(url, params);
         String result1 = getResult(result,sysFileInfoDao);
         System.out.println("获取结果路径："+result1);
         System.out.println("----------------------------------------------");
@@ -692,20 +681,20 @@ class HttpThread2 implements Runnable{
     }
 
     public static String getResult(String results, SysFileInfoDao sysFileInfoDao){
-         results="{\n" +
-                "    \"msg\": \"completed\",\n" +
-                "    \"result\": [\n" +
-                "        {\n" +
-                "            \"result_path\": \"D:\\\\文档\\\\工作\\\\SCD:\\\\文档\\\\工作\\\\SC\\\\专利〔2022〕0405-zz公司\\\\1649148530559.pdf\",\n" +
-                "            \"saved_path\": \"D:\\\\文档\\\\工作\\\\SC\\\\1649155666614.pdf\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"result_path\": \"D:\\\\文档\\\\工作\\\\SCD:\\\\文档\\\\工作\\\\SC\\\\专利〔2022〕0405-zz公司\\\\1649148530565.docx\",\n" +
-                "            \"saved_path\": \"D:\\\\文档\\\\工作\\\\SC\\\\1649155666555.xls\"\n" +
-                "        }\n" +
-                "    ],\n" +
-                "    \"status\": 200\n" +
-                "}";
+//         results="{\n" +
+//                "    \"msg\": \"completed\",\n" +
+//                "    \"result\": [\n" +
+//                "        {\n" +
+//                "            \"result_path\": \"D:\\\\文档\\\\工作\\\\SCD:\\\\文档\\\\工作\\\\SC\\\\专利〔2022〕0405-zz公司\\\\1649148530559.pdf\",\n" +
+//                "            \"saved_path\": \"D:\\\\文档\\\\工作\\\\SC\\\\1649155666614.pdf\"\n" +
+//                "        },\n" +
+//                "        {\n" +
+//                "            \"result_path\": \"D:\\\\文档\\\\工作\\\\SCD:\\\\文档\\\\工作\\\\SC\\\\专利〔2022〕0405-zz公司\\\\1649148530565.docx\",\n" +
+//                "            \"saved_path\": \"D:\\\\文档\\\\工作\\\\SC\\\\1649155666555.xls\"\n" +
+//                "        }\n" +
+//                "    ],\n" +
+//                "    \"status\": 200\n" +
+//                "}";
 
         Object parse = com.alibaba.fastjson.JSONObject.parse(results);
         com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(parse.toString());
