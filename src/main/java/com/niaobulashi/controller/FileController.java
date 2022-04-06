@@ -14,6 +14,7 @@ import com.niaobulashi.service.PdfService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,6 +55,16 @@ public class FileController {
     @Autowired
     private PdfService pdfService;
 
+    @GetMapping("/downloadPage")
+    public String downloadPage() {
+        return "downloadPage";
+    }
+
+    @GetMapping("/post-2-j")
+    public String postPage() {
+        return "post-2-j";
+    }
+
     /**
      * 文件上传页面
      *
@@ -71,7 +82,7 @@ public class FileController {
     @GetMapping("/showTasks")
     @ResponseBody
     public JSONObject showTask(){
-        List<TaskInfo> all = taskInfoDao.findAll();
+        List<TaskInfo> all = taskInfoDao.findAll(Sort.by("id").descending());
 
         Map<String, Object> stringJSONArrayHashMap = new HashMap<>();
 
@@ -98,7 +109,9 @@ public class FileController {
     @GetMapping("/showFileInfo")
     @ResponseBody
     public JSONObject showFileInfo(String taskName){
-        List<SysFileInfo> data = sysFileInfoDao.searchByTaskName(taskName);
+        String taskName1 = taskName.replace("\"","");
+        System.out.println(taskName1);
+        List<SysFileInfo> data = sysFileInfoDao.searchByTaskName(taskName1);
         JSONObject data1 = new JSONObject();
         data1.put("total", data.size());
         data1.put("rows", data);
@@ -155,7 +168,8 @@ public class FileController {
                     os.write(buffer, 0, i);
                     i = bis.read(buffer);
                 }
-                return ResponseCode.success("下载成功");
+//                return ResponseCode.success("下载成功");
+                return null;
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -318,7 +332,8 @@ public class FileController {
                     os.write(buffer, 0, i);
                     i = bis.read(buffer);
                 }
-                return ResponseCode.success("下载成功");
+//                return ResponseCode.success("下载成功");
+                return null;
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -354,7 +369,7 @@ public class FileController {
      */
     @PostMapping("/batchUpload")
     @ResponseBody
-    public ResponseCode batchUpload(@RequestParam("files") MultipartFile[] files, String Cname) throws Exception {
+    public ResponseCode batchUpload(@RequestParam("input-b6a[]") MultipartFile[] files, String Cname) throws Exception {
 
         String name = newName(Cname,1);
         if (files == null) {
@@ -425,7 +440,7 @@ public class FileController {
      */
     @PostMapping("/patentTow")
     @ResponseBody
-    public ResponseCode patentTow(@RequestParam("files") MultipartFile[] files, String Cname) throws Exception {
+    public ResponseCode patentTow(@RequestParam("input-b6a[]") MultipartFile[] files, String Cname) throws Exception {
 
         String name = newName(Cname,2);
         if (files == null) {

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>四方智汇</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,
+          shrink-to-fit=no">
+    <link rel="stylesheet" href="/static/css/bootstrap.css" th:href="@{/static/css/bootstrap.css}" type="text/css"/>
+    <link rel="stylesheet" href="/static/css/woniunote.css" th:href="@{/static/css/woniunote.css}" type="text/css"/>
+    <link href="/static/icon/font/css/open-iconic-bootstrap.css" th:href="@{/static/icon/font/css/open-iconic-bootstrap.css}" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap-table/1.14.2/bootstrap-table.min.css">
+    <script type="text/javascript" src="/static/js/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/static/js/bootbox.js"></script>
+    <script type="text/javascript" src="/static/js/SFZH.js"></script>
+	<script src="https://cdn.bootcss.com/bootstrap-table/1.14.2/bootstrap-table.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.1.4/locale/bootstrap-table-zh-CN.min.js"></script>
+
+
+
+
+
+</head>
+<body>
+<!-- 首页顶部Logo和Slogan区域 -->
+<div class="navbar-default header">
+    <div class="container" style="padding: 0px 10px 0px 0px;">
+        <div class="row">
+            <div class="col-sm-4 col-4" style="margin: 10px 0px;">
+                <a href="/">
+                    <img src="../static/img/logo_sf.png" style="width: 230px;">
+                </a>
+            </div>
+            <!-- 仅在sm及以上设备中显示 -->
+            <div class="col-sm-8 col-8 d-none d-sm-block"
+                 style="text-align: right; padding-top: 20px;">
+                <h2 style="color: midnightblue">国家高新技术申请认证企业</h2>
+            </div>
+            <!-- 仅在移动端显示 -->
+            <div class="col-sm-8 col-8 d-sm-none"
+                 style="text-align: right; padding-top: 20px;">
+                <h3 style="color: midnightblue">国家高新</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 设置一个最外层DIV，保持100%的宽度拉通，设置导航栏 -->
+<div class="menu">
+    <div class="container" style="padding: 0px;">
+        <!-- 基于BootStrap定制导航栏，可以参数bootcss.com中文网站的教程 -->
+        <nav class="navbar navbar-expand-lg navbar-dark menu-bar">
+            <a class="navbar-brand" href="#">快捷导航</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <!-- 配置折叠按钮，在移动端点击即可显示导航菜单，所有类和ID属性请勿修改 -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <!-- 配置导航菜单项列表 -->
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link" href="/" onclick="checkLog()">自动辅助账生成</a>
+<!--                    <a class="nav-item nav-link" href="/type/2-1">专利立项</a>-->
+                    <a class="nav-item nav-link" href="/post-2-j">自动专利文档生成</a>
+                    <a class="nav-item nav-link" href="/downloadPage">文档下载</a>
+                </div>
+                <!-- ml-auto类属性设置菜单项靠右对齐 -->
+                <div class="navbar-nav ml-auto">
+
+<!--                    {% if session.get('islogin') == 'true'  %}-->
+<!--                    <a class="nav-item nav-link" href="#">欢迎您：{{ session.get('nickname')}}</a>-->
+                    &nbsp;&nbsp;&nbsp;
+                    <a class="nav-item nav-link" href="/logout">注销</a>
+                    <a class="nav-item nav-link" href="#">用户中心</a>
+<!--                    {% else %}-->
+                    <a class="nav-item nav-link" href="#" data-toggle="modal" data-target="#mymodal" >登录/注册</a>
+<!--                    {% endif %}-->
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+
+<!-- 中部区域布局 -->
+<style>
+      #delUser{
+                background: #1caf9a;
+                color: #FFFFFF;
+                border: none;
+                margin-left: 12px;
+            }
+      #disuser{
+          background: #92b6b2;
+          color: #faf7f7;
+          border: none;
+          margin-left: 12px;
+      }
+      @media (min-width: 992px) {
+          .modal-lg {
+              with: 992px;
+          }
+      }
+</style>
+
+<div class="container" style="margin-top: 20px;">
+	
+	
+	<table id="mytab" class="table table-hover" ></table>
+        <script>
+		//var queryUrl = '/TestUser/FindWithPager?rnd=' + Math.random() 后台url
+
+
+        $('#mytab').bootstrapTable({
+                url: '/showTasks',
+                method: 'GET',                      //请求方式
+                toolbar: "#toolbar",
+                sidePagination: "true",
+				sortable: true,                     //是否启用排序
+				sortOrder: "desc",                   //排序方式
+				search: true,
+				showRefresh: true,  //是否显示刷新按钮				
+                striped: true, // 是否显示行间隔色
+                //search : "true",
+                uniqueId: "id",
+
+                pageSize: "10",                     //每页的记录行数（*）
+                pagination: true, // 是否分页
+                columns: [{
+                        field: 'id',
+                        title: '序号'
+                    },
+                    {
+                        field: 'name',
+                        title: '任务名称'
+                    },
+                    {
+                        field: 'time',
+                        title: '任务时间'
+                    },
+                    {
+                        title: '任务类型',
+                        field: 'type',
+                        align: 'center',
+                        formatter: function (value, row, index) {
+                            if (value === 1){
+                                return '辅助账'
+                            }
+                            else if(value === 2){
+                                return '专利生成'
+                            }
+                        }
+
+                    },
+                    {
+                        title: '任务解析状态',
+                        field: 'status',
+                        align: 'center',
+                        valign: 'middle',
+                        formatter: function (value, row, index) {
+                            if (value == 0){
+                                return '正在解析'
+                            }
+                            else if(value == 1){
+                                return '解析完成'
+                            }
+                        }
+
+                    },
+                    {
+
+                        title: '操作',
+                        field: 'id',
+
+                        align: 'center',
+                        valign: 'middle',
+                        formatter: option
+
+                    }
+
+                ]
+
+            });
+            //操作栏的格式化
+            // 定义删除、更新操作
+            function option(value, row, index) {
+                if (row.status === 0){
+                    var htm = '<button id="disuser" userId=' +
+                        value +
+                        ' >下载</button>'
+                    return htm;
+                }
+                else if (row.status === 1){
+                    if (row.type === 1){
+                        // 辅助账下载
+                        var htm = '<button id="delUser" userId=' +
+                            value +
+                            ' onclick="delUser(this)">下载</button>'
+                        return htm;
+                    }
+                    else if(row.type === 2){
+                        // confirm("确认下载当前文件嘛？"+ row.name)
+                        // 专利下载
+                        var htm = '<button id="delUser" data-toggle="modal" data-target="#myModal1" onclick="patentUser(&quot;'+ row.name + '&quot;)">下载</button>'
+                        return htm;
+                    }
+
+                }
+
+            }
+
+        // 专利用户
+        function patentUser(dom) {
+            var str = JSON.stringify(dom)
+            $('#myModal1').on('shown.bs.modal', function (dom) {
+                var thisurl = '/showFileInfo?taskName='.concat(str)
+                // alert(thisurl)
+                var $mytab2 = $("#mytab2");
+                $mytab2.bootstrapTable('destroy');
+
+                $('#mytab2').bootstrapTable({
+                    url: thisurl,
+                    method: 'GET',                      //请求方式
+                    toolbar: "#toolbar",
+                    sidePagination: "true",
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "desc",                   //排序方式
+                    search: true,
+                    showRefresh: true,  //是否显示刷新按钮
+                    striped: true, // 是否显示行间隔色
+                    //search : "true",
+                    uniqueId: "id",
+
+                    pageSize: "10",                     //每页的记录行数（*）
+                    pagination: true, // 是否分页
+                    columns: [{
+                        field: 'fileId',
+                        title: '序号'
+                    },
+                        {
+                            field: 'fileName',
+                            title: '文件名称'
+                        },
+                        {
+                            title: '公司名称',
+                            field: 'taskName'
+                        },
+                        {
+                            title: '任务解析状态',
+                            field: 'resultStatus',
+                            align: 'center',
+                            valign: 'middle',
+                            formatter: function (value, row, index) {
+                                if (value == 0){
+                                    return '正在解析'
+                                }
+                                else if(value == 1){
+                                    return '解析完成'
+                                }
+                            }
+
+                        },
+                        {
+
+                            title: '操作',
+                            field: 'fileId',
+                            align: 'center',
+                            valign: 'middle',
+                            formatter: option2
+                        }
+                    ]
+
+                });
+                $('#myModal1').off('shown.bs.modal');//去除绑定
+            });
+        }
+
+        $('#myModal1').on('hidden.bs.modal', function (e) {
+
+            document.getElementById("mytab2").reset();
+
+            $('#myModal1').off('hidden.bs.modal');//去除绑定
+
+        });
+
+        function option2(value, row, index) {
+            if (row.resultStatus === 0){
+                var htm = '<button id="disuser" userId=' +
+                    value +
+                    ' >下载</button>'
+                return htm;
+            }
+            else if (row.resultStatus === 1){
+                // 下载
+                var htm = '<button id="delUser" userId=' +
+                    value +
+                    ' onclick="delpatentUser(this)">下载</button>'
+                return htm;
+
+            }
+
+        }
+
+            // 专利用户
+            function delpatentUser(dom) {
+
+                var mymessage = confirm("确认下载当前文件嘛？");
+                if(mymessage == true) {
+                    var fileId = $(dom).attr("userId");
+                    request(fileId,'/downloadTow');
+                    // $.post('/downloadTow','fileId='+ $(dom).attr("userId"), function (data){
+                    //     var response = data.response;
+                    //     bootbox.alert({title:"正常提示",message:response.msg});
+                    //     if (response.msg == '下载成功'){
+                    //         bootbox.alert({title:"正常提示",message:"下载成功."});
+                    //     }
+                    //     else {
+                    //         bootbox.alert({title:"错误提示",message:"服务器繁忙."});
+                    //     }
+                    // });
+
+                }
+            }
+
+            // 辅助账用户
+            function delUser(dom) {
+
+                var mymessage = confirm("确认下载当前文件嘛？");
+                if(mymessage == true) {
+                    var fileId = $(dom).attr("userId");
+                    request(fileId,'/download');
+                    // $.post('/download','fileId='+ $(dom).attr("userId"), function (data){
+                    //    //  var response = data.response;
+                    //    //  bootbox.alert({title:"正常提示",message:response.msg});
+                    //    // if (response.msg == '下载成功'){
+                    //    //      bootbox.alert({title:"正常提示",message:"下载成功."});
+                    //    //  }
+                    //    //  else {
+                    //    //      bootbox.alert({title:"错误提示",message:"服务器繁忙."});
+                    //    //  }
+                    //
+                    //
+                    // });
+
+                }
+            }
+
+        $('#disuser').prop('disabled', true);
+
+
+        </script>
+
+    <div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h5 class="modal-title" id="myModal1Label">专利任务信息</h5>
+                </div>
+                <div class="modal-body">
+                    <table id="mytab2" class="table table-hover" ></table>
+                    <script>
+                        //var queryUrl = '/TestUser/FindWithPager?rnd=' + Math.random() 后台url
+
+                        //操作栏的格式化
+                        // 定义删除、更新操作
+
+                    </script>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+
+
+</div>
+
+<!-- 底部设计 -->
+<div class="container-fluid footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-4 left">
+                	<p>版权所有 &copy; 四方智汇 (V-1.0)</p>
+                	<p>备案号： </p>
+            </div>
+            <div class="col-4 center">
+
+            </div>
+            <div class="col-4 right">
+                	<p>联系我们</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 登录和注册模态框 -->
+<!-- data-backdrop="static" 表示用户必须要手工关闭模态框才能操作其他页面 -->
+<div class="modal fade" id="mymodal" data-backdrop="static" tabindex="-1"
+     role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal-dialog" role="document">
+<div class="modal-content">
+    <!-- 在模态框内部配置Tab选项卡，用于切换登录和注册窗口 -->
+    <div class="tabbable" id="tabs"
+         style="background-color: #337AB7; height: 50px;padding: 5px 20px;">
+        <button type="button" class="close" data-dismiss="modal">
+            <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+        </button>
+        <!-- 与登录和注册窗口的ID进行关联 -->
+        <ul class="nav nav-tabs" role="tablist">
+            <li id="login" class="nav-item active">
+                <a href="#loginpanel" data-toggle="tab" class="nav-link" style="color: midnightblue">登录</a>
+            </li>
+            <li id="reg" class="nav-item">
+                <a href="#regpanel" data-toggle="tab" class="nav-link" style="color: midnightblue">注册</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 绘制登录窗口 -->
+    <div class="tab-content">
+    <div class="tab-pane container active" id="loginpanel">
+    <div class="modal-content" style="margin: 20px 0px;">
+    <div class="modal-body">
+        <div class="form-group row" style="margin-top: 20px;">
+            <label for="loginname" class="col-4">&nbsp;&nbsp;登录邮箱：</label>
+            <input type="text" id="loginname" class="form-control col-7" placeholder="请输入你的邮箱地址"/>
+        </div>
+        <div class="form-group row">
+            <label for="loginpass" class="col-4">&nbsp;&nbsp;登录密码：</label>
+            <input type="password" id="loginpass" class="form-control col-7" placeholder="请输入你的登录密码"/>
+        </div>
+        <div class="form-group row">
+            <label for="logincode" class="col-4"> &nbsp;&nbsp;图片验证码：</label>
+            <input type="text" id="logincode" class="form-control col-5" placeholder="请输入右侧的验证码"/>
+            <img src="/vcode" id="loginvcode" class="col-3" style="cursor:pointer;" onclick="this.src= '/vcode?' + Math.random()"/>
+        </div>
+    </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-dark" data-dismiss="modal">关闭</button>
+            <button type="button" class="btn btn-primary" onclick="doLogin()">登录</button>
+        </div>
+    </div>
+    </div>
+
+    <!-- 绘制注册窗口 -->
+    <div class="tab-pane container" id="regpanel">
+    <div class="modal-content">
+    <div class="modal-content" style="margin: 20px 0px;">
+    <div class="modal-body">
+        <div class="form-group row" style="margin-top: 20px;">
+            <label for="regname" class="col-4">&nbsp;&nbsp;注册邮箱：</label>
+            <input type="text" id="regname" class="form-control col-7" placeholder="请输入你的邮箱地址"/>
+        </div>
+        <div class="form-group row">
+            <label for="regpass" class="col-4">&nbsp;&nbsp;注册密码：</label>
+            <input type="password" id="regpass" class="form-control col-7" placeholder="请输入你的注册密码"/>
+        </div>
+        <div class="form-group row">
+            <label for="regcode" class="col-4">&nbsp;&nbsp;邮箱验证码：</label>
+            <input type="text" id="regcode" class="form-control col-4" placeholder="请输入邮箱验证码"/>
+            <button type="button" class="btn btn-primary col-3" onclick="doSendMail(this)">发送邮件</button>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <span>注册时请使用邮箱地址，便于找回密码。&nbsp;&nbsp;</span>
+        <button type="button" class="btn btn-dark" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary" onclick="doReg()">注册</button>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+</div>
+</div>
+</div>
+
+</body>
+</html>
