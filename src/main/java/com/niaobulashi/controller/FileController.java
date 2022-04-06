@@ -723,8 +723,8 @@ class HttpThread2 implements Runnable{
                 JSONObject job = JSONObject.fromObject(result.getJSONObject(i));  // 遍历 jsonarray 数组，把每一个对象转成 json 对象
                 Object saved_path = job.get("saved_path");
                 Object result_path = job.get("result_path");
-                System.out.println(saved_path) ;
-                System.out.println(result_path) ;
+                System.out.println("saved——path————————————   "+saved_path);
+                System.out.println("result_path————————————   "+result_path);
 
 //                sysFileInfoDao.findById()
 
