@@ -211,7 +211,7 @@ public class FileController {
      */
     @PostMapping("/upload")
     @ResponseBody
-    private ResponseCode upload(@RequestParam("file") MultipartFile file, String name, String cname) throws Exception {
+    private ResponseCode upload(@RequestParam("input-b6a[]") MultipartFile file, String name, String cname) throws Exception {
         // 获取文件在服务器上的存储位置
 //        String serverPath = globalProperties.getServerPath();
         String serverPath = "D:\\文档\\工作\\SC";
@@ -244,6 +244,8 @@ public class FileController {
 
         // 获取文件名
         String fileName = file.getOriginalFilename();
+//        String fileName = name;
+//        System.out.println(fileName);
         // 获取文件扩展名
         String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
 
@@ -254,7 +256,7 @@ public class FileController {
 
         SysFileInfo sysFileInfo = new SysFileInfo();
         // 重新生成的文件名
-        String saveFileName = System.currentTimeMillis() + fileExtension;
+        String saveFileName = System.currentTimeMillis() + fileName;
         // 在指定目录下创建该文件
         File targetFile = new File(filePath, saveFileName);
 
@@ -370,7 +372,7 @@ public class FileController {
     @PostMapping("/batchUpload")
     @ResponseBody
     public ResponseCode batchUpload(@RequestParam("input-b6a[]") MultipartFile[] files, String Cname) throws Exception {
-
+        System.out.println(Cname);
         String name = newName(Cname,1);
         if (files == null) {
             return ResponseCode.error("参数为空");
@@ -397,12 +399,12 @@ public class FileController {
 
         File file = new File(newPath);
 //        String func = func(file);
-        String func = String.valueOf(getFilePath(file));
-        String str1 = func.substring(1);
-        String substring = str1.substring(0, func.length() - 2);
-        String str = name + "#" + substring;
 
-        String get = "localhost:5000/Date";
+        String func = String.valueOf(getFilePath(file));
+        String s = func.replaceAll("(?:\\[|null|\\]| +)", "");
+        String str = name + "#" + s;
+
+        String get = "http://0.0.0.0:5000/Date";
 
 
 
@@ -441,7 +443,6 @@ public class FileController {
     @PostMapping("/patentTow")
     @ResponseBody
     public ResponseCode patentTow(@RequestParam("input-b6a[]") MultipartFile[] files, String Cname) throws Exception {
-
         String name = newName(Cname,2);
         if (files == null) {
             return ResponseCode.error("参数为空");
@@ -516,7 +517,7 @@ public class FileController {
         String s = newTxt(jsonObjects.toString());
 
 //        String get = "http://192.168.3.109:5000/Date";
-        String get = "localhost:5001/Date";
+        String get = "http://0.0.0.0:5001/Date";
         System.out.println("开始HTTP0000000000000000000000000");
         Map<String, Object> params1 = new HashMap<String, Object>();
 //        params1.put("file_name","/Users/ture/BU/work/专利/3-31/httpParam.txt");
@@ -579,7 +580,7 @@ public class FileController {
         LocalDateTime localDateTime = LocalDateTime.now();
         String newName="";
         if (type==1){
-            newName="辅助帐" + '〔' + localDateTime.getYear() + '〕' + localDateTime.format(DateTimeFormatter.ofPattern("MMdd")) + "-" + name;
+            newName="辅助账" + '〔' + localDateTime.getYear() + '〕' + localDateTime.format(DateTimeFormatter.ofPattern("MMdd")) + "-" + name;
         }
         if (type==2){
             newName="专利" + '〔' + localDateTime.getYear() + '〕' + localDateTime.format(DateTimeFormatter.ofPattern("MMdd")) + "-" + name;
@@ -656,6 +657,7 @@ class HttpThread implements Runnable{
     }
 
     public String getResult(String results){
+        System.out.println(results);
         JSONObject jsonObject = JSONObject.fromObject(results);
         JSONObject result = (JSONObject) jsonObject.get("result");
         String saved_path = String.valueOf(result.get("saved_path"));

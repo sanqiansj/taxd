@@ -37,7 +37,7 @@ public class HttpTools {
 
     }
 
-    public final static int REQUEST_TIMEOUT = 30 * 1000;
+    public final static int REQUEST_TIMEOUT = 3000 * 1000;
     public static final String GET = "GET";
     public static final String POST = "POST";
     public static final String PUT = "PUT";
