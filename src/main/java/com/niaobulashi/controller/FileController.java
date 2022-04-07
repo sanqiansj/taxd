@@ -724,7 +724,7 @@ class HttpThread2 implements Runnable{
         System.out.println("\n\n----------------------------------------------");
         System.out.println(Thread.currentThread().getName() + "正在处理http请求");
         String result = "请求失败";
-//        result = HttpTools.get(url, params);
+        result = HttpTools.get(url, params);
         String result1 = getResult(result,sysFileInfoDao,taskInfoDao,taskInfo);
         System.out.println("获取结果路径："+result1);
         System.out.println("----------------------------------------------");
