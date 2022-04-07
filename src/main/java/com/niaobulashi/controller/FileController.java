@@ -1,6 +1,5 @@
 package com.niaobulashi.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import net.sf.json.JSONObject;
 import com.niaobulashi.Utils.HttpTools;
@@ -308,20 +307,48 @@ public class FileController {
         // 获取文件全路径
         File file = new File(byId.get().getPath());
         String fileNames = byId.get().getName();
+        String name = file.getName();
+//        try {
+//            if (request.getHeader("User-Agent").toUpperCase().indexOf("MSIE") > 0) {
+//                name = URLEncoder.encode(name, "UTF-8");
+//            } else {
+//                name = new String(name.getBytes("UTF-8"), "ISO8859-1");
+//            }
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+        System.out.println("filename+++++++++++++++++++"+fileNames);
+        System.out.println("name+++++++++++++++++"+name);
 
         // 判断是否存在磁盘中
         if (file.exists()) {
-            response.setContentType("application/octet-stream");
+//            response.setContentType("application/octet-stream");
+            //                response.setContentType("application/"+fileNames.split("\\.")[1]);
+//            response.setHeader("Content-Disposition", "attachment; filename="+ name);
+            //                response.setHeader("Content-Disposition", "attachment; filename=" + java.net.URLEncoder.encode(name, "UTF-8"));
+//            response.setHeader("Content-Disposition", "attachment; filename=" + name);
+
+//            String fileName = attachmentName;
+//            response.setContentType("multipart/form-data");
+//            //response.setContentType("multipart/form-data;charset=UTF-8");也可以明确的设置一下UTF-8，测试中不设置也可以。
+//            response.setHeader("Content-Disposition", "attachment; fileName="+  fileName +";filename*=utf-8''"+URLEncoder.encode(fileName,"UTF-8"));
+//
+
+
+
+
+
             try {
-                response.setHeader("content-disposition", "attachement;filename=" + new String(file.getName().getBytes("utf-8"), "ISO-8859-1"));
+                response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("utf-8"),"ISO8859-1"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
 
-//            // 设置强制下载不打开
+
+            // 设置强制下载不打开
 //            response.setContentType("application/force-download");
 //            // 设置文件名
-//            response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);
+//            response.addHeader("Content-Disposition", "attachment;fileName=" + name);
             byte[] buffer = new byte[1024];
             FileInputStream fis = null;
             BufferedInputStream bis = null;
@@ -399,6 +426,10 @@ public class FileController {
 
         File file = new File(newPath);
 //        String func = func(file);
+
+
+
+
 
         String func = String.valueOf(getFilePath(file));
         String s = func.replaceAll("(?:\\[|null|\\]| +)", "");
@@ -526,7 +557,7 @@ public class FileController {
 //        params1.put("file_name","大理欧普智能科技有限公司公司公司#/Users/ture/BU/work/专利/大理/大理欧普智能科技有限公司规划表.xls,/Users/ture/BU/work/专利/大理/大理_2021序时账.xls,/Users/ture/BU/work/专利/大理/大理2020序时账.xls,/Users/ture/BU/work/专利/大理/大理_2019序时账.xls");
         System.out.println("向http 请求发送："+"str");
 
-        HttpThread2 httpThread2 = new HttpThread2(get,params1,sysFileInfoDao);
+        HttpThread2 httpThread2 = new HttpThread2(get,params1,sysFileInfoDao,taskInfoDao,taskInfo);
         Thread thread2 = new Thread(httpThread2);
         thread2.start();
         System.out.println("结束HTTP000000000000000000000000");
@@ -677,11 +708,15 @@ class HttpThread2 implements Runnable{
 
 
     private SysFileInfo sysFileInfo;
+    private TaskInfoDao taskInfoDao;
     private SysFileInfoDao sysFileInfoDao;
-    public HttpThread2(String url, Map<String, Object> params,SysFileInfoDao sysFileInfoDao) {
+    private TaskInfo taskInfo;
+    public HttpThread2(String url, Map<String, Object> params, SysFileInfoDao sysFileInfoDao, TaskInfoDao taskInfoDao, TaskInfo taskInfo) {
         this.url = url;
         this.params = params;
         this.sysFileInfoDao=sysFileInfoDao;
+        this.taskInfoDao=taskInfoDao;
+        this.taskInfo=taskInfo;
     }
     @Override
     public void run() {
@@ -689,30 +724,15 @@ class HttpThread2 implements Runnable{
         System.out.println("\n\n----------------------------------------------");
         System.out.println(Thread.currentThread().getName() + "正在处理http请求");
         String result = "请求失败";
-        result = HttpTools.get(url, params);
-        String result1 = getResult(result,sysFileInfoDao);
+//        result = HttpTools.get(url, params);
+        String result1 = getResult(result,sysFileInfoDao,taskInfoDao,taskInfo);
         System.out.println("获取结果路径："+result1);
         System.out.println("----------------------------------------------");
 
 
     }
 
-    public static String getResult(String results, SysFileInfoDao sysFileInfoDao){
-//         results="{\n" +
-//                "    \"msg\": \"completed\",\n" +
-//                "    \"result\": [\n" +
-//                "        {\n" +
-//                "            \"result_path\": \"D:\\\\文档\\\\工作\\\\SCD:\\\\文档\\\\工作\\\\SC\\\\专利〔2022〕0405-zz公司\\\\1649148530559.pdf\",\n" +
-//                "            \"saved_path\": \"D:\\\\文档\\\\工作\\\\SC\\\\1649155666614.pdf\"\n" +
-//                "        },\n" +
-//                "        {\n" +
-//                "            \"result_path\": \"D:\\\\文档\\\\工作\\\\SCD:\\\\文档\\\\工作\\\\SC\\\\专利〔2022〕0405-zz公司\\\\1649148530565.docx\",\n" +
-//                "            \"saved_path\": \"D:\\\\文档\\\\工作\\\\SC\\\\1649155666555.xls\"\n" +
-//                "        }\n" +
-//                "    ],\n" +
-//                "    \"status\": 200\n" +
-//                "}";
-
+    public static String getResult(String results, SysFileInfoDao sysFileInfoDao, TaskInfoDao taskInfoDao, TaskInfo taskInfo){
         Object parse = com.alibaba.fastjson.JSONObject.parse(results);
         com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(parse.toString());
         JSONArray result = (JSONArray) jsonObject.get("result");
@@ -721,8 +741,18 @@ class HttpThread2 implements Runnable{
             for(int i=0;i<result.size();i++){
 
                 JSONObject job = JSONObject.fromObject(result.getJSONObject(i));  // 遍历 jsonarray 数组，把每一个对象转成 json 对象
+                //结果
                 Object saved_path = job.get("saved_path");
+//                saved_path = "F:/flask学习资料/Python Flask全程实战-多功能博客系统开发/FlaskDemo-前端页面/lin/3-31/0.docx";
+                //原始
                 Object result_path = job.get("result_path");
+//                result_path = "D:\\文档\\工作\\SC\\1649157003776.pdf";
+
+                SysFileInfo sysFileInfo =sysFileInfoDao.findByFilePath(result_path.toString());
+                sysFileInfo.setResultStatus(1);
+                sysFileInfo.setResultPath(saved_path.toString());
+                SysFileInfo save = sysFileInfoDao.save(sysFileInfo);
+                System.out.println("sys--------"+save);
                 System.out.println("saved——path————————————   "+saved_path);
                 System.out.println("result_path————————————   "+result_path);
 
@@ -730,11 +760,10 @@ class HttpThread2 implements Runnable{
 
                 sysFileInfoDao.updata(saved_path.toString(),result_path.toString());
             }
+            taskInfo.setStatus(1);
+            TaskInfo save1 = taskInfoDao.save(taskInfo);
+            System.out.println("task22222"+save1);
         }
-
-//        JSONArray jsonArray = JSONArray.parseArray(s);
-        System.out.println(result);
-
         return null;
     }
 

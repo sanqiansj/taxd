@@ -23,7 +23,11 @@ public interface SysFileInfoDao extends JpaRepository<SysFileInfo, Integer> {
 
 
     @Transactional
-    @Query(value = "UPDATE sys_file_info SET result_path=?2 WHERE file_path=?1",nativeQuery = true)
+    @Query(value = "UPDATE sys_file_info SET result_path=?1 WHERE file_path=?2",nativeQuery = true)
     @Modifying
     void updata(@Param("yuanshi") String yuanshi, @Param("jieguo") String jieguo);
+
+
+    @Query(value = "select * FROM sys_file_info where file_path=?1",nativeQuery = true)
+    SysFileInfo findByFilePath(String toString);
 }
