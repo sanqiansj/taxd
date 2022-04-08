@@ -522,13 +522,13 @@ public class FileController {
                 //获取表路径
                 pathResult=path;
                 pathjson.put("规划表",path);
-                pathjson.put("原始文件路径",serverPath+path);
+                pathjson.put("原始文件路径",path);
                 jsonObjects.add(pathjson);
             }
             if (nowPath.equals("ocx")||nowPath.equals("doc")){
                 //做doc 分析处理 放入jsonarry
                 JSONObject data = pdfService.analysisWord(path);
-                data.put("原始文件路径",serverPath+path);
+                data.put("原始文件路径",path);
 
 
 
@@ -537,7 +537,7 @@ public class FileController {
             if (nowPath.equals("pdf")||nowPath.equals("PDF")){
                 //做pdf 分析处理 放入jsonarry
                 JSONObject data = pdfService.analysispdf(path);
-                data.put("原始文件路径",serverPath+path);
+                data.put("原始文件路径",path);
 
 
                 jsonObjects.add(data);
@@ -725,6 +725,11 @@ class HttpThread2 implements Runnable{
         System.out.println(Thread.currentThread().getName() + "正在处理http请求");
         String result = "请求失败";
         result = HttpTools.get(url, params);
+        try {
+            result = java.net.URLDecoder.decode(result,"utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         System.out.println("获得http结果"+result);
         String result1 = getResult(result,sysFileInfoDao
                 ,taskInfoDao,taskInfo);
