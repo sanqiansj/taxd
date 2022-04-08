@@ -547,15 +547,15 @@ public class FileController {
 
         String s = newTxt(jsonObjects.toString());
 
-//        String get = "http://192.168.3.109:5000/Date";
-        String get = "http://0.0.0.0:5001/Date";
+        String get = "http://192.168.3.109:5001/Date";
+//        String get = "http://0.0.0.0:5001/Date";
         System.out.println("开始HTTP0000000000000000000000000");
         Map<String, Object> params1 = new HashMap<String, Object>();
 //        params1.put("file_name","/Users/ture/BU/work/专利/3-31/httpParam.txt");
         params1.put("file_name",s);
 
 //        params1.put("file_name","大理欧普智能科技有限公司公司公司#/Users/ture/BU/work/专利/大理/大理欧普智能科技有限公司规划表.xls,/Users/ture/BU/work/专利/大理/大理_2021序时账.xls,/Users/ture/BU/work/专利/大理/大理2020序时账.xls,/Users/ture/BU/work/专利/大理/大理_2019序时账.xls");
-        System.out.println("向http 请求发送："+"str");
+        System.out.println("向http 请求发送："+params1);
 
         HttpThread2 httpThread2 = new HttpThread2(get,params1,sysFileInfoDao,taskInfoDao,taskInfo);
         Thread thread2 = new Thread(httpThread2);
@@ -725,7 +725,9 @@ class HttpThread2 implements Runnable{
         System.out.println(Thread.currentThread().getName() + "正在处理http请求");
         String result = "请求失败";
         result = HttpTools.get(url, params);
-        String result1 = getResult(result,sysFileInfoDao,taskInfoDao,taskInfo);
+        System.out.println("获得http结果"+result);
+        String result1 = getResult(result,sysFileInfoDao
+                ,taskInfoDao,taskInfo);
         System.out.println("获取结果路径："+result1);
         System.out.println("----------------------------------------------");
 
