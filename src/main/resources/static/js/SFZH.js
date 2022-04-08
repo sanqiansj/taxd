@@ -129,7 +129,7 @@ function request (fileId,url) {
         const a = document.createElement('a');
         const blob = new Blob([data]);
         const blobUrl = window.URL.createObjectURL(blob);
-        const filename = req.getResponseHeader('Content-Disposition').split('filename=')[1]
+        const filename = decodeURI(req.getResponseHeader('Content-Disposition').split('filename=')[1]);
         download(blobUrl,filename) ;
     };
     req.send('fileId='+ fileId);

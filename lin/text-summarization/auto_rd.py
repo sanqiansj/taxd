@@ -197,8 +197,6 @@ def get_innovation(text,file_name,res_temp):
                 res_str = res_str[1:]
             if len(res_str) <= 70:
                 res_str=res_str
-            if len(res_str)==0:
-                continue
             elif 70 < len(res_str) <= 140:
                 temp_str = summary(res_str, stop_word, topK_ratio=0.7)
                 res_str=temp_str
@@ -210,6 +208,8 @@ def get_innovation(text,file_name,res_temp):
                 res_str=temp_str
            # print('aaaaa',res_str)
             #print('dddddddddddddddddddddddddddd',res_str,len(res_str),type(res_str),res_str[-1],res_str[:-1])
+            if len(res_str) == 0:
+                continue
             while not checkChinese(res_str[-1]):
                 print('res_str1',res_str[-1])
                 res_str=res_str[:-1]

@@ -146,7 +146,7 @@ public class FileController {
         if (file.exists()) {
             response.setContentType("application/octet-stream");
             try {
-                response.setHeader("content-disposition", "attachement;filename=" + new String(file.getName().getBytes("utf-8"), "ISO-8859-1"));
+                response.setHeader("content-disposition", "attachement;filename=" + java.net.URLEncoder.encode(file.getName(), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -339,7 +339,7 @@ public class FileController {
 
 
             try {
-                response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("utf-8"),"ISO8859-1"));
+                response.addHeader("Content-Disposition", "attachment;filename=" + java.net.URLEncoder.encode(name, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
