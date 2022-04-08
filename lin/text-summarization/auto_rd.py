@@ -210,12 +210,12 @@ def get_innovation(text,file_name,res_temp):
                 res_str=temp_str
            # print('aaaaa',res_str)
             #print('dddddddddddddddddddddddddddd',res_str,len(res_str),type(res_str),res_str[-1],res_str[:-1])
-            # while not checkChinese(res_str[-1]):
-            #  #   print('res_str1',res_str[-1])
-            #     res_str=res_str[:-1]
-              #  print('res_str2', res_str)
-            # if res_str[-1] != '。':
-            #     res_str+= '。'
+            while not checkChinese(res_str[-1]):
+                print('res_str1',res_str[-1])
+                res_str=res_str[:-1]
+                print('res_str2', res_str)
+            if res_str[-1] != '。':
+                res_str+= '。'
             inv_content_set.append(res_str)
 
     if len(inv_content_set)==0:
