@@ -547,8 +547,8 @@ public class FileController {
 
         String s = newTxt(jsonObjects.toString());
 
-        String get = "http://192.168.3.109:5001/Date";
-//        String get = "http://0.0.0.0:5001/Date";
+//        String get = "http://192.168.3.109:5001/Date";
+        String get = "http://0.0.0.0:5001/Date";
         System.out.println("开始HTTP0000000000000000000000000");
         Map<String, Object> params1 = new HashMap<String, Object>();
 //        params1.put("file_name","/Users/ture/BU/work/专利/3-31/httpParam.txt");
